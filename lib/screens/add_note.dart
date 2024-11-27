@@ -17,8 +17,6 @@ class _AddNotePageState extends State<AddNotePage> {
       return;
     }
 
-    final db = await DatabaseService.instance.database;
-
     final note = Note(
       title: _titleController.text,
       description: _descriptionController.text,
@@ -26,11 +24,11 @@ class _AddNotePageState extends State<AddNotePage> {
     );
 
     try {
-      await db.insert('notes', note.toMap());
+      await DatabaseService.instance.insert('notes', note.toMap());
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Note saved successfully')),
       );
-      Navigator.pop(context, true); // Mengembalikan nilai true sebagai sinyal pembaruan
+      Navigator.pop(context, true); // Mengembalikan nilai true untuk trigger update
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to save note: $e')),
