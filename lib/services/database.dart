@@ -25,7 +25,8 @@ class DatabaseService {
       CREATE TABLE users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT NOT NULL,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        is_logged_in INTEGER NOT NULL DEFAULT 0
       );
     ''');
 
@@ -62,5 +63,41 @@ class DatabaseService {
   Future<int> deleteAll(String table) async {
     final db = await database;
     return await db.delete(table);
+  }
+
+  /// Tandai pengguna tertentu sebagai login dengan username.
+  Future<void> markUserAsLoggedIn(String username) async {
+    final db = await database;
+
+    // Tandai semua pengguna sebagai logout
+    await db.update('users', {'is_logged_in': 0});
+
+    // Tandai pengguna tertentu sebagai login
+    await db.update(
+      'users',
+      {'is_logged_in': 1},
+      where: 'username = ?',
+      whereArgs: [username],
+    );
+  }
+
+  /// Ambil data pengguna yang sedang login.
+  Future<Map<String, dynamic>?> getLoggedInUser() async {
+    final db = await database;
+
+    final result = await db.query(
+      'users',
+      where: 'is_logged_in = ?',
+      whereArgs: [1],
+      limit: 1,
+    );
+
+    return result.isNotEmpty ? result.first : null;
+  }
+
+  /// Logout semua pengguna (reset `is_logged_in` menjadi 0).
+  Future<void> logoutAllUsers() async {
+    final db = await database;
+    await db.update('users', {'is_logged_in': 0});
   }
 }
